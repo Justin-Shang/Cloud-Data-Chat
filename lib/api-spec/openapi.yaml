@@ -1,0 +1,375 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Data Chat API - Upload Excel files and query via conversation
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: datasets
+    description: Dataset management
+  - name: records
+    description: Record querying
+  - name: chat
+    description: Conversational search
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /datasets:
+    get:
+      operationId: listDatasets
+      tags: [datasets]
+      summary: List all uploaded datasets
+      responses:
+        "200":
+          description: List of datasets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dataset"
+
+  /datasets/upload:
+    post:
+      operationId: uploadDataset
+      tags: [datasets]
+      summary: Upload an Excel file and import into database
+      responses:
+        "201":
+          description: Dataset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+        "400":
+          description: Invalid file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /datasets/{id}:
+    get:
+      operationId: getDataset
+      tags: [datasets]
+      summary: Get a dataset by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dataset details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dataset"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteDataset
+      tags: [datasets]
+      summary: Delete a dataset and all its records
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /datasets/{id}/records:
+    get:
+      operationId: listRecords
+      tags: [records]
+      summary: List records in a dataset with optional keyword search
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Keyword to filter records
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Max results to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Pagination offset
+      responses:
+        "200":
+          description: Records list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordsPage"
+
+  /records/search:
+    get:
+      operationId: searchAllRecords
+      tags: [records]
+      summary: Search across all datasets
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search keyword
+        - name: datasetId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Optionally restrict to a dataset
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matching records
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+
+  /chat/message:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a chat message and receive search results
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageInput"
+      responses:
+        "200":
+          description: Chat response with search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
+  /chat/history:
+    get:
+      operationId: getChatHistory
+      tags: [chat]
+      summary: Get recent chat history
+      responses:
+        "200":
+          description: Chat messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+
+  /datasets/stats:
+    get:
+      operationId: getDatasetsStats
+      tags: [datasets]
+      summary: Get summary stats across all datasets
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatasetsStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    Dataset:
+      type: object
+      required: [id, name, filename, rowCount, columnCount, columns, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        filename:
+          type: string
+        sheetName:
+          type: ["string", "null"]
+        rowCount:
+          type: integer
+        columnCount:
+          type: integer
+        columns:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    Record:
+      type: object
+      required: [id, datasetId, rowData]
+      properties:
+        id:
+          type: integer
+        datasetId:
+          type: integer
+        rowData:
+          type: object
+          additionalProperties: true
+
+    RecordsPage:
+      type: object
+      required: [records, total, limit, offset]
+      properties:
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/Record"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    SearchResultItem:
+      type: object
+      required: [id, datasetId, datasetName, rowData, matchedColumns]
+      properties:
+        id:
+          type: integer
+        datasetId:
+          type: integer
+        datasetName:
+          type: string
+        rowData:
+          type: object
+          additionalProperties: true
+        matchedColumns:
+          type: array
+          items:
+            type: string
+
+    SearchResults:
+      type: object
+      required: [results, query, total]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResultItem"
+        query:
+          type: string
+        total:
+          type: integer
+
+    ChatMessageInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        datasetId:
+          type: ["integer", "null"]
+
+    ChatMessage:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        searchQuery:
+          type: ["string", "null"]
+        resultCount:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    ChatResponse:
+      type: object
+      required: [message, results]
+      properties:
+        message:
+          $ref: "#/components/schemas/ChatMessage"
+        results:
+          $ref: "#/components/schemas/SearchResults"
+
+    DatasetsStats:
+      type: object
+      required: [totalDatasets, totalRecords, totalColumns]
+      properties:
+        totalDatasets:
+          type: integer
+        totalRecords:
+          type: integer
+        totalColumns:
+          type: integer
+        recentDatasets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dataset"
+
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string

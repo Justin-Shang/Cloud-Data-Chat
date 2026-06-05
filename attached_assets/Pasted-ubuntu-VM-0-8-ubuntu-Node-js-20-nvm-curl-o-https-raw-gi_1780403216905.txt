@@ -1,0 +1,64 @@
+ubuntu@VM-0-8-ubuntu:~$ # 安装 Node.js 20+（推荐用 nvm）
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+nvm install 20
+nvm use 20
+
+# 安装 pnpm
+npm install -g pnpm
+
+# 安装 PM2（进程守护）
+npm install -g pm2
+
+# 安装 PostgreSQL（或使用云数据库服务）
+apt install postgresql postgresql-contrib
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 16555  100 16555    0     0     44      0  0:06:16  0:06:13  0:00:03  3121
+=> Downloading nvm from git to '/home/ubuntu/.nvm'
+=> Cloning into '/home/ubuntu/.nvm'...
+remote: Enumerating objects: 428, done.
+remote: Counting objects: 100% (428/428), done.
+remote: Compressing objects: 100% (354/354), done.
+remote: Total 428 (delta 60), reused 194 (delta 46), pack-reused 0 (from 0)
+Receiving objects: 100% (428/428), 415.66 KiB | 18.00 KiB/s, done.
+Resolving deltas: 100% (60/60), done.
+* (HEAD detached at FETCH_HEAD)
+  master
+=> Compressing and cleaning up git repository
+
+=> Appending nvm source string to /home/ubuntu/.bashrc
+=> Appending bash_completion source string to /home/ubuntu/.bashrc
+=> You currently have modules installed globally with `npm`. These will no
+=> longer be linked to the active version of Node when you install a new node
+=> with `nvm`; and they may (depending on how you construct your `$PATH`)
+=> override the binaries of modules installed with `nvm`:
+
+/home/ubuntu/.hermes-transformers/arcee/node/lib
+├── @askjo/camofox-browser@1.11.2
+├── agent-browser@0.26.0
+├── corepack@0.34.6
+=> If you wish to uninstall them at a later point (or re-install them under your
+=> `nvm` Nodes), you can remove them from the system Node as follows:
+
+     $ nvm use system
+     $ npm uninstall -g a_module
+
+=> Close and reopen your terminal to start using nvm or run the following to use it now:
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+Command 'nvm' not found, but there are 14 similar ones.
+Command 'nvm' not found, but there are 14 similar ones.
+
+added 1 package in 2s
+
+1 package is looking for funding
+  run `npm fund` for details
+
+added 90 packages in 14s
+
+8 packages are looking for funding
+  run `npm fund` for details
+E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?

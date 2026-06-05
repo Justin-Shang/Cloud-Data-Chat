@@ -1,0 +1,2 @@
+- [Orval api-zod barrel collision fix](orval-api-zod-barrel.md) — ListRecordsParams (and any query-param schema) collides between generated/api.ts and generated/types/; fix by removing schemas from orval config and patching barrel in codegen script.
+- [Drizzle FK circular reference](drizzle-fk-circular.md) — Using .references(() => otherTable.id) in Drizzle schema can cause TS7022 "implicitly has type any" in composite lib builds; use plain integer() without .references() instead.
